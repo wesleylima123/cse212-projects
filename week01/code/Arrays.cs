@@ -12,6 +12,13 @@ public static class Arrays
         // Remember: Using comments in your program, write down your process for solving this problem
         // step by step before you write the code. The plan should be clear enough that it could
         // be implemented by another person.
+        
+        // PLAN:
+        // 1. Create an array of doubles with size = 'length'
+        // 2. For each position i in the array (from 0 to length-1):
+        //    - The value at position i will be: number * (i + 1)
+        // 3. Return the populated array
+        
         double[] result = new double[length];
 
         for (int i = 0; i < length; i++)
@@ -35,6 +42,17 @@ public static class Arrays
         // Remember: Using comments in your program, write down your process for solving this problem
         // step by step before you write the code. The plan should be clear enough that it could
         // be implemented by another person.
+
+        // PLAN:
+        // Example: data = {1,2,3,4,5,6,7,8,9}, amount = 3
+        // Expected result: {7,8,9,1,2,3,4,5,6}
+        //
+        // STEPS:
+        // 1. Calculate the split point: splitIndex = data.Count - amount
+        // 2. Get the last 'amount' elements: data.GetRange(splitIndex, amount)
+        // 3. Remove the last 'amount' elements: data.RemoveRange(splitIndex, amount)
+        // 4. Insert the elements at the beginning: data.InsertRange(0, lastElements)
+
         int splitIndex = data.Count - amount;
         List<int> lasts = data.GetRange(splitIndex, amount);
         data.RemoveRange(splitIndex, amount);
