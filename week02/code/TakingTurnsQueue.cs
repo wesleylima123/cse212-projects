@@ -21,7 +21,25 @@ public class TakingTurnsQueue
     public void AddPerson(string name, int turns)
     {
         var person = new Person(name, turns);
-        _people.Enqueue(person);
+        
+        // Since PersonQueue is LIFO (Enqueue adds to front), we need to
+        // rebuild the queue each time to maintain FIFO order.
+        var tempList = new List<Person>();
+        
+        // Save all existing items
+        while (!_people.IsEmpty())
+        {
+            tempList.Add(_people.Dequeue());
+        }
+        
+        // Add the new person to the END of the list
+        tempList.Add(person);
+        
+        // Rebuild in reverse order (because Enqueue adds to front)
+        for (int i = tempList.Count - 1; i >= 0; i--)
+        {
+            _people.Enqueue(tempList[i]);
+        }
     }
 
     /// <summary>
@@ -37,17 +55,44 @@ public class TakingTurnsQueue
         {
             throw new InvalidOperationException("No one in the queue.");
         }
-        else
+        
+        Person person = _people.Dequeue();
+        
+        // Check for infinite turns (turns <= 0)
+        if (person.Turns <= 0)
         {
-            Person person = _people.Dequeue();
-            if (person.Turns > 1)
+            // Re-add infinite turns person to the queue
+            // Need to rebuild to maintain order
+            var tempList = new List<Person>();
+            while (!_people.IsEmpty())
             {
-                person.Turns -= 1;
-                _people.Enqueue(person);
+                tempList.Add(_people.Dequeue());
             }
-
-            return person;
+            tempList.Add(person);
+            for (int i = tempList.Count - 1; i >= 0; i--)
+            {
+                _people.Enqueue(tempList[i]);
+            }
         }
+        // Check if person has more than 1 turn left
+        else if (person.Turns > 1)
+        {
+            person.Turns -= 1;
+            // Re-add with updated turns
+            var tempList = new List<Person>();
+            while (!_people.IsEmpty())
+            {
+                tempList.Add(_people.Dequeue());
+            }
+            tempList.Add(person);
+            for (int i = tempList.Count - 1; i >= 0; i--)
+            {
+                _people.Enqueue(tempList[i]);
+            }
+        }
+        // else Turns == 1: do NOT add back
+        
+        return person;
     }
 
     public override string ToString()
