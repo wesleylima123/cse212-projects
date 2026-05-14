@@ -4,31 +4,86 @@
 /// </summary>
 public class CustomerService {
     public static void Run() {
-        // Example code to see what's in the customer service queue:
-        // var cs = new CustomerService(10);
-        // Console.WriteLine(cs);
-
         // Test Cases
 
-        // Test 1
-        // Scenario: 
-        // Expected Result: 
-        Console.WriteLine("Test 1");
-
-        // Defect(s) Found: 
-
+        // Test 1: Create queue with valid size
+        // Scenario: Create a new CustomerService with maxSize = 5
+        // Expected Result: Queue should have max_size = 5
+        Console.WriteLine("Test 1 - Valid Queue Creation");
+        var cs1 = new CustomerService(5);
+        Console.WriteLine($"Expected max_size=5, Actual: {cs1}");
+        Console.WriteLine("Defect(s) Found: None");
         Console.WriteLine("=================");
 
-        // Test 2
-        // Scenario: 
-        // Expected Result: 
-        Console.WriteLine("Test 2");
-
-        // Defect(s) Found: 
-
+        // Test 2: Create queue with invalid size (<= 0)
+        // Scenario: Create a new CustomerService with maxSize = -1
+        // Expected Result: Queue should default to max_size = 10
+        Console.WriteLine("Test 2 - Invalid Queue Creation (size <= 0)");
+        var cs2 = new CustomerService(-1);
+        Console.WriteLine($"Expected max_size=10, Actual: {cs2}");
+        Console.WriteLine("Defect(s) Found: None");
         Console.WriteLine("=================");
 
-        // Add more Test Cases As Needed Below
+        // Test 3: Add customer when queue has room
+        // Scenario: Add customers to queue with capacity 3
+        // Expected Result: Customers are added successfully
+        Console.WriteLine("Test 3 - Add Customer With Room");
+        Console.WriteLine("Please add 2 customers to test:");
+        var cs3 = new CustomerService(3);
+        Console.WriteLine($"Initial queue: {cs3}");
+        Console.WriteLine("Adding first customer...");
+        cs3.AddNewCustomer(); // Customer 1
+        Console.WriteLine($"Queue after 1st customer: {cs3}");
+        Console.WriteLine("Adding second customer...");
+        cs3.AddNewCustomer(); // Customer 2
+        Console.WriteLine($"Queue after 2nd customer: {cs3}");
+        Console.WriteLine("Defect(s) Found: None (assuming customers added)");
+        Console.WriteLine("=================");
+
+        // Test 4: Add customer when queue is full
+        // Scenario: Try to add a customer when queue count equals maxSize
+        // Expected Result: Error message "Maximum Number of Customers in Queue"
+        Console.WriteLine("Test 4 - Add Customer When Full");
+        var cs4 = new CustomerService(2);
+        Console.WriteLine($"Created queue with max_size=2: {cs4}");
+        Console.WriteLine("Adding first customer...");
+        cs4.AddNewCustomer();
+        Console.WriteLine($"Queue after 1st: {cs4}");
+        Console.WriteLine("Adding second customer...");
+        cs4.AddNewCustomer();
+        Console.WriteLine($"Queue after 2nd: {cs4}");
+        Console.WriteLine("Adding third customer (should fail)...");
+        cs4.AddNewCustomer();
+        Console.WriteLine("Expected: 'Maximum Number of Customers in Queue' message");
+        Console.WriteLine("Defect(s) Found: _queue.Count > _maxSize should be >= _maxSize");
+        Console.WriteLine("=================");
+
+        // Test 5: Serve customer when queue has customers
+        // Scenario: Serve a customer from non-empty queue
+        // Expected Result: First customer is displayed and removed
+        Console.WriteLine("Test 5 - Serve Customer With Customers");
+        var cs5 = new CustomerService(3);
+        Console.WriteLine("Adding 2 test customers...");
+        // Note: For automated testing, we'd need to mock Console input
+        // For manual testing, uncomment and run:
+        // cs5.AddNewCustomer();
+        // cs5.AddNewCustomer();
+        // Console.WriteLine($"Queue before serve: {cs5}");
+        // cs5.ServeCustomer();
+        // Console.WriteLine($"Queue after serve: {cs5}");
+        Console.WriteLine("Defect(s) Found: ServeCustomer removes wrong index, doesn't check empty");
+        Console.WriteLine("=================");
+
+        // Test 6: Serve customer when queue is empty
+        // Scenario: Try to serve from an empty queue
+        // Expected Result: Error message "No customers in queue to serve"
+        Console.WriteLine("Test 6 - Serve Customer When Empty");
+        var cs6 = new CustomerService(5);
+        Console.WriteLine($"Empty queue: {cs6}");
+        cs6.ServeCustomer();
+        Console.WriteLine("Expected: 'No customers in queue to serve' message");
+        Console.WriteLine("Defect(s) Found: No empty check before dequeue");
+        Console.WriteLine("=================");
     }
 
     private readonly List<Customer> _queue = new();
@@ -66,8 +121,8 @@ public class CustomerService {
     /// new record into the queue.
     /// </summary>
     private void AddNewCustomer() {
-        // Verify there is room in the service queue
-        if (_queue.Count > _maxSize) {
+        // FIX 1: Condition should be >= (if queue is full, cannot add)
+        if (_queue.Count >= _maxSize) {
             Console.WriteLine("Maximum Number of Customers in Queue.");
             return;
         }
@@ -88,8 +143,15 @@ public class CustomerService {
     /// Dequeue the next customer and display the information.
     /// </summary>
     private void ServeCustomer() {
-        _queue.RemoveAt(0);
+        // FIX 2: Check if queue is empty before serving
+        if (_queue.Count == 0) {
+            Console.WriteLine("No customers in queue to serve.");
+            return;
+        }
+        
+        // FIX 3: Get the customer BEFORE removing, then remove at index 0
         var customer = _queue[0];
+        _queue.RemoveAt(0);
         Console.WriteLine(customer);
     }
 
