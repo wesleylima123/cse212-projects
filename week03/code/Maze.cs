@@ -25,14 +25,29 @@ public class Maze
         _mazeMap = mazeMap;
     }
 
-    // TODO Problem 4 - ADD YOUR CODE HERE
     /// <summary>
     /// Check to see if you can move left.  If you can, then move.  If you
     /// can't move, throw an InvalidOperationException with the message "Can't go that way!".
     /// </summary>
     public void MoveLeft()
     {
-        // FILL IN CODE
+        // Get the valid directions for the current position
+        if (!_mazeMap.ContainsKey((_currX, _currY)))
+        {
+            throw new InvalidOperationException("Invalid position!");
+        }
+        
+        bool[] directions = _mazeMap[(_currX, _currY)];
+        
+        // Check if left is allowed (index 0)
+        if (directions[0]) // left
+        {
+            _currX--; // Move left decreases x coordinate
+        }
+        else
+        {
+            throw new InvalidOperationException("Can't go that way!");
+        }
     }
 
     /// <summary>
@@ -41,7 +56,22 @@ public class Maze
     /// </summary>
     public void MoveRight()
     {
-        // FILL IN CODE
+        if (!_mazeMap.ContainsKey((_currX, _currY)))
+        {
+            throw new InvalidOperationException("Invalid position!");
+        }
+        
+        bool[] directions = _mazeMap[(_currX, _currY)];
+        
+        // Check if right is allowed (index 1)
+        if (directions[1]) // right
+        {
+            _currX++; // Move right increases x coordinate
+        }
+        else
+        {
+            throw new InvalidOperationException("Can't go that way!");
+        }
     }
 
     /// <summary>
@@ -50,7 +80,22 @@ public class Maze
     /// </summary>
     public void MoveUp()
     {
-        // FILL IN CODE
+        if (!_mazeMap.ContainsKey((_currX, _currY)))
+        {
+            throw new InvalidOperationException("Invalid position!");
+        }
+        
+        bool[] directions = _mazeMap[(_currX, _currY)];
+        
+        // Check if up is allowed (index 2)
+        if (directions[2]) // up
+        {
+            _currY++; // Move up increases y coordinate (depending on coordinate system)
+        }
+        else
+        {
+            throw new InvalidOperationException("Can't go that way!");
+        }
     }
 
     /// <summary>
@@ -59,7 +104,22 @@ public class Maze
     /// </summary>
     public void MoveDown()
     {
-        // FILL IN CODE
+        if (!_mazeMap.ContainsKey((_currX, _currY)))
+        {
+            throw new InvalidOperationException("Invalid position!");
+        }
+        
+        bool[] directions = _mazeMap[(_currX, _currY)];
+        
+        // Check if down is allowed (index 3)
+        if (directions[3]) // down
+        {
+            _currY--; // Move down decreases y coordinate
+        }
+        else
+        {
+            throw new InvalidOperationException("Can't go that way!");
+        }
     }
 
     public string GetStatus()
