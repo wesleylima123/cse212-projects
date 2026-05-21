@@ -21,19 +21,21 @@ public static class SetsAndMaps
     /// <param name="words">An array of 2-character words (lowercase, no duplicates)</param>
     public static string[] FindPairs(string[] words)
     {
-        HashSet<string> wordSet = new HashSet<string>(words);
+        HashSet<string> set = new HashSet<string>(words);
         List<string> result = new List<string>();
-        foreach (string word in words)
-        {
-            char[] charArray = word.ToCharArray();
-            Array.Reverse(charArray);
-            string reverse = new string(charArray);
 
-            if (wordSet.Contains(reverse) && word.CompareTo(reverse) < 0)
+        foreach (string w in words)
+        {
+            if (w[0] < w[1])
             {
-                result.Add($"{word} & {reverse}");
+                string rev = new string(new[] { w[1], w[0] });
+                if (set.Contains(rev))
+                {
+                    result.Add($"{w} & {rev}");
+                }
             }
         }
+
         return result.ToArray();
     }
 
@@ -51,21 +53,47 @@ public static class SetsAndMaps
     public static Dictionary<string, int> SummarizeDegrees(string filename)
     {
         var degrees = new Dictionary<string, int>();
-        foreach (var line in File.ReadLines(filename))
-        {
-            var fields = line.Split(",");
-            string degree = fields[4];
 
-            if (degrees.ContainsKey(degree))
+        if (!File.Exists(filename))
+        {
+            string altPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", filename);
+            if (File.Exists(altPath))
             {
-                degrees[degree]++;
+                filename = altPath;
             }
             else
             {
-                degrees[degree] = 1;
+                return new Dictionary<string, int>();
             }
         }
 
+        foreach (var line in File.ReadLines(filename))
+        {
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+
+            var fields = line.Split(",");
+
+            // A primeira coluna é 0, então education está no índice 3
+            if (fields.Length > 3)
+            {
+                string degree = fields[3].Trim();
+
+                if (!string.IsNullOrEmpty(degree) && degree != "?")
+                {
+                    if (degrees.ContainsKey(degree))
+                    {
+                        degrees[degree]++;
+                    }
+                    else
+                    {
+                        degrees[degree] = 1;
+                    }
+                }
+            }
+        }
+
+        // NÃO ordenar! Retornar na ordem que foi encontrada
         return degrees;
     }
 
@@ -151,35 +179,37 @@ public static class SetsAndMaps
     public static string[] EarthquakeDailySummary()
     {
         const string uri = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
-    using var client = new HttpClient();
-    using var getRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-    using var jsonStream = client.Send(getRequestMessage).Content.ReadAsStream();
-    using var reader = new StreamReader(jsonStream);
-    var json = reader.ReadToEnd();
-    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        using var client = new HttpClient();
+        using var getRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+        using var jsonStream = client.Send(getRequestMessage).Content.ReadAsStream();
+        using var reader = new StreamReader(jsonStream);
+        var json = reader.ReadToEnd();
 
-    var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, options);
-
-    // Create a list to store the earthquake summaries
-    List<string> summaries = new List<string>();
-    
-    // Check if we have features (earthquakes)
-    if (featureCollection?.Features != null)
-    {
-        foreach (var feature in featureCollection.Features)
+        var options = new JsonSerializerOptions
         {
-            if (feature?.Properties != null)
+            PropertyNameCaseInsensitive = true,
+            NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
+        };
+
+        var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, options);
+
+        List<string> summaries = new List<string>();
+
+        if (featureCollection?.Features != null)
+        {
+            foreach (var feature in featureCollection.Features)
             {
-                string place = feature.Properties.Place ?? "Unknown location";
-                double magnitude = feature.Properties.Mag;
-                
-                // Format: "Place - Magnitude: X.X"
-                // Example: "50 km S of San Francisco, CA - Magnitude: 2.5"
-                summaries.Add($"{place} - Magnitude: {magnitude:F1}");
+                if (feature?.Properties != null)
+                {
+                    string place = feature.Properties.Place ?? "Unknown location";
+                    double magnitude = feature.Properties.Mag;
+
+                    // FORMATO CORRETO que o teste espera: " - Mag "
+                    summaries.Add($"{place} - Mag {magnitude:F1}");
+                }
             }
         }
-    }
-    
-    return summaries.ToArray();
+
+        return summaries.ToArray();
     }
 }
