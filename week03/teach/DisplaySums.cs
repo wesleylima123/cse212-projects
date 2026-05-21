@@ -29,5 +29,36 @@
     /// <param name="numbers">array of integers</param>
     private static void DisplaySumPairs(int[] numbers) {
         // TODO Problem 2 - This should print pairs of numbers in the given array
+        
+        // HashSet to store numbers we've already seen
+        HashSet<int> seen = new HashSet<int>();
+        
+        // HashSet to avoid printing duplicate pairs (e.g., (4,6) and (6,4))
+        HashSet<string> printedPairs = new HashSet<string>();
+        
+        foreach (int number in numbers)
+        {
+            int complement = 10 - number;
+            
+            // Check if the complement has been seen before
+            if (seen.Contains(complement))
+            {
+                // Create a unique key for this pair (order doesn't matter)
+                // Use smaller number first to ensure consistency
+                int first = Math.Min(number, complement);
+                int second = Math.Max(number, complement);
+                string pairKey = $"{first},{second}";
+                
+                // Only print if we haven't printed this pair before
+                if (!printedPairs.Contains(pairKey))
+                {
+                    Console.WriteLine($"{number} {complement}");
+                    printedPairs.Add(pairKey);
+                }
+            }
+            
+            // Add current number to seen set
+            seen.Add(number);
+        }
     }
 }

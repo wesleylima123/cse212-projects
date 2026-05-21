@@ -17,20 +17,59 @@ public class Basketball
 {
     public static void Run()
     {
+        // Map (Dictionary) to store total points for each player
         var players = new Dictionary<string, int>();
 
-        using var reader = new TextFieldParser("basketball.csv");
+        using var reader = new TextFieldParser("../../../basketball.csv");
         reader.TextFieldType = FieldType.Delimited;
         reader.SetDelimiters(",");
         reader.ReadFields(); // ignore header row
-        while (!reader.EndOfData) {
+        
+        while (!reader.EndOfData) 
+        {
             var fields = reader.ReadFields()!;
             var playerId = fields[0];
             var points = int.Parse(fields[8]);
+            
+            // Add points to the player's total
+            if (players.ContainsKey(playerId))
+            {
+                players[playerId] += points;
+            }
+            else
+            {
+                players[playerId] = points;
+            }
         }
 
-        Console.WriteLine($"Players: {{{string.Join(", ", players)}}}");
+        Console.WriteLine($"Total unique players: {players.Count}");
+        Console.WriteLine();
 
-        var topPlayers = new string[10];
+        // Convert dictionary to list of (playerId, totalPoints) and sort by points (descending)
+        var sortedPlayers = players
+            .OrderByDescending(kvp => kvp.Value)  // Sort by total points (highest first)
+            .Take(10)                              // Take only top 10
+            .ToList();
+
+        // Display the top 10 players
+        Console.WriteLine("Top 10 Players by Career Points:");
+        Console.WriteLine("==================================");
+        Console.WriteLine("Rank  Player ID                                    Total Points");
+        Console.WriteLine("----  ------------------------------------------  ------------");
+        
+        for (int i = 0; i < sortedPlayers.Count; i++)
+        {
+            // Align player ID (some are long, so keep them readable)
+            string playerId = sortedPlayers[i].Key;
+            int totalPoints = sortedPlayers[i].Value;
+            
+            // Format with rank, player ID (truncate if too long for display)
+            if (playerId.Length > 40)
+            {
+                playerId = playerId.Substring(0, 37) + "...";
+            }
+            
+            Console.WriteLine($"{i + 1,4}  {playerId,-42}  {totalPoints,11:N0}");
+        }
     }
 }
